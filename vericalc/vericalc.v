@@ -26,10 +26,10 @@ module vericalc(input clk, rst, input [3:0] usrin, output [3:0] seldisp, output[
 	assign bout = (count == 6) ? rhund: 0;
 	assign aout = ((count == 6) && (op != DIV)) ? rthou: ((count == 6) && (op == DIV)) ? residue : 0;
 
-	assign adec = a * 10;
-	assign bdec = c * 10;
-	assign anum = adec + b;
-	assign bnum = bdec + d;
+	assign adec = c * 10;
+	assign bdec = a * 10;
+	assign anum = adec + d;
+	assign bnum = bdec + b;
 	
 	wire[7:0] sumres;
 	assign sumres = anum + bnum;
@@ -63,6 +63,7 @@ module vericalc(input clk, rst, input [3:0] usrin, output [3:0] seldisp, output[
 	
 	dispdrive displaydriver(clk, rst, aout, bout, cout, dout, seldisp, display);
 	
+	reg[23:0] timeout;	
 	always @(posedge clk) begin
 		if (rst) begin
 			count <= 0;
@@ -103,17 +104,26 @@ module vericalc(input clk, rst, input [3:0] usrin, output [3:0] seldisp, output[
 				end
 		end
 		else if ((usrin != 0) && (usrin > 10) && (count == 2)) begin
-			if (usrin == 11)
-				op = MUL;
-			else if (usrin == 12)
-				op = SUM;
-			else if (usrin == 13)
-				op = DIV;
-			else if (usrin == 14)
-				op = POW;
-			else if (usrin == 15)
-				op = LOG;
-			count <= count + 1;
+			if (usrin == 11) begin
+				op <= MUL;
+				count <= count + 1;
+			end
+			else if (usrin == 12) begin
+				op <= SUM;
+				count <= count + 1;
+			end
+			else if (usrin == 13) begin
+				op <= DIV;
+				count <= count + 1;
+			end
+			else if (usrin == 14) begin
+				op <= POW;
+				count <= count + 1;
+			end
+			else if (usrin == 15) begin
+				op <= LOG;
+				count <= 6;
+			end
 		end
 		else if ((usrin == 15) && (count == 5))
 			count <= count + 1;
@@ -123,6 +133,14 @@ module vericalc(input clk, rst, input [3:0] usrin, output [3:0] seldisp, output[
 			c <= 0;
 			d <= 0;
 			count <= 0;
+		end
+		if (usrin == 0) begin
+			if (timeout == 15000000) begin
+				pastusrin <= 0;
+				timeout <= 0;
+			end
+			else
+				timeout <= timeout + 1;
 		end
 	end	
 endmodule

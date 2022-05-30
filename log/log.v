@@ -17,12 +17,12 @@ module log(input clk, rst, input[6:0] a, output reg[6:0] result);
 				buffer <= a;
 				count <= count + 1;
 			end
-			else if (buffer> 2) begin
+			else if (buffer >= 2) begin
 				buffer <= buffer / 2;
 				count <= count + 1;
 			end
 			else begin
-				result <= count ;
+				result <= count - 1;
 				finish <= 1;
 			end
 		end
